@@ -6,6 +6,12 @@
 	  <IncludeBuildOutput>false</IncludeBuildOutput>
 	  <IncludeSymbols>false</IncludeSymbols>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <Authors>dovjar</Authors>
+	  <Company>TinkamasKodas</Company>
+	  <PackageProjectUrl>https://github.com/Tinkamas-kodas/ExceptionToProblemDetails</PackageProjectUrl>
+	  <Description>Geenrator for map exceptions to ProblemDetails and generate OpenAPI (swagger) speicification including ProblemDetails</Description>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -29,6 +35,11 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
 	</ItemGroup>
 	
-
+	<ItemGroup>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 	
 </Project>
