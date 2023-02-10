@@ -14,12 +14,12 @@ namespace ExceptionToProblemDetails.Generator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
-//#if DEBUG
-//            if (!Debugger.IsAttached)
-//            {
-//                Debugger.Launch();
-//            }
-//#endif
+#if DEBUG
+            if (!Debugger.IsAttached)
+            {
+                Debugger.Launch();
+            }
+#endif
             // Register a factory that can create our custom syntax receiver
             context.RegisterForSyntaxNotifications(() => new MapToProblemDetailsAttributeSyntaxReceiver());
         }
@@ -185,8 +185,8 @@ namespace {mainMethod.ContainingNamespace.ToDisplayString()}
                             StatusCode = (int)statusCode.Value,
                             OnExceptionFullQualifiedTypeName =
                                 $"{exceptionTypeValue.ContainingNamespace.ToDisplayString()}.{exceptionTypeValue.Name}",
-                            ConverterTypeFullQualifiedTypeName = $"{typeValue.ContainingNamespace.ToDisplayString()}.{typeValue.Name}",
-                            ProblemDetailsTypeFullQualifiedTypeName = $"{problemDetailsTypeValue.ContainingNamespace.ToDisplayString()}.{problemDetailsTypeValue.Name}",
+                            ConverterTypeFullQualifiedTypeName = typeValue.ToDisplayString(),
+                            ProblemDetailsTypeFullQualifiedTypeName = problemDetailsTypeValue.ToDisplayString(),
                         });
                     }
                     else

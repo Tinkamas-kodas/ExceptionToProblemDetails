@@ -8,7 +8,12 @@ namespace ExceptionToProblemDetails
     {
         public virtual TProblemDetail Convert(TException exception, int statusCode)
         {
-            return CreateDefaultProblemDetail(statusCode);
+            var result= CreateDefaultProblemDetail(statusCode);
+            if (exception is IEnrichProblemDetails<TProblemDetail> enricher)
+            {
+                enricher.Enrich(result);
+            }
+            return result;
         }
 
         protected TProblemDetail CreateDefaultProblemDetail(int statusCode)

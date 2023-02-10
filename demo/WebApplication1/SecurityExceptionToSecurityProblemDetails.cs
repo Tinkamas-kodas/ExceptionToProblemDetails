@@ -1,8 +1,22 @@
 using DemoService;
 using ExceptionToProblemDetails;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1
 {
+    public class SecurityExceptionEnriched : SecurityException, IEnrichProblemDetails<ProblemDetails>
+    {
+        public SecurityExceptionEnriched(ForbiddenReasonEnum forbiddenReason) : base(forbiddenReason)
+        {
+        }
+
+
+        public void Enrich(ProblemDetails action)
+        {
+            action.Detail = ForbiddenReason.ToString();
+            action.Extensions.Add("reason", ForbiddenReason);
+        }
+    }
     public class
         SecurityExceptionToSecurityProblemDetails : BaseExceptionToProblemDetailsConverter<SecurityException,
             SecurityProblemDetails>

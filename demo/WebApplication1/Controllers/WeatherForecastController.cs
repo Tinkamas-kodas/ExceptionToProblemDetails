@@ -23,8 +23,11 @@ namespace WebApplication1.Controllers
         [HttpGet("{location}")]
         [ProducesResponseType(typeof(IEnumerable<WeatherForecast> ),StatusCodes.Status200OK )]
         [MapToProblemDetails(StatusCodes.Status404NotFound, ExceptionType = typeof(NotFoundException))]
-        public IEnumerable<WeatherForecast> Get(string location)
+        [MapToProblemDetails(StatusCodes.Status403Forbidden, ConverterType = typeof(BaseExceptionToProblemDetailsConverter<SecurityExceptionEnriched,ProblemDetails>))]
+        public IEnumerable<WeatherForecast> Get(string? location)
         {
+            if (string.IsNullOrEmpty(location))
+                throw new SecurityExceptionEnriched(ForbiddenReasonEnum.EntityDeleted);
              return forecastService.GetForecastForLocation(location);
         }
         [HttpDelete("{location}")]

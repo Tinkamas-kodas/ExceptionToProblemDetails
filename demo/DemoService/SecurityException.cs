@@ -2,7 +2,13 @@ using System;
 
 namespace DemoService
 {
-    public class SecurityException : Exception
+    public class BaseException : Exception
+    {
+
+    }
+
+    
+    public class SecurityException : BaseException
     {
         public ForbiddenReasonEnum ForbiddenReason { get; }
 

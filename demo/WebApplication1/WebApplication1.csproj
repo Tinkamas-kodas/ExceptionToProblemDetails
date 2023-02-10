@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ExceptionResponseMapperGenerator\ExceptionToProblemDetails.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\src\ExceptionToProblemDetails.Generator\ExceptionToProblemDetails.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\src\ExceptionToProblemDetails\ExceptionToProblemDetails.csproj" />
     <ProjectReference Include="..\DemoService\DemoService.csproj" />
   </ItemGroup>
