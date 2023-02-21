@@ -23,7 +23,7 @@ namespace WebApplication2
         {
             services.AddControllers().AddHttpExceptions(options =>
             {
-                //options.ShouldLogException = exception => false;
+                options.ShouldLogException = exception => false;
                 new ExceptionToProblemDetailsMap(options).Map();
             });
             //services.AddEndpointsApiExplorer();

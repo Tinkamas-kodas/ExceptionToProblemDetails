@@ -1,5 +1,6 @@
 using Hellang.Middleware.ProblemDetails;
 using System;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1
 {
@@ -12,7 +13,7 @@ namespace WebApplication1
             this.options = options;
         }
 
-        partial void MapConverter<TConverter, TException, TProblemDetails>(int statusCode, ExceptionToProblemDetails.ControllerActionDefinition actionDefinition) where TConverter : ExceptionToProblemDetails.IExceptionToProblemDetailsConverter<TException, TProblemDetails> where TException : System.Exception where TProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails
+        partial void MapConverter<TConverter, TException, TProblemDetails>(int statusCode, ExceptionToProblemDetails.ControllerActionDefinition actionDefinition) where TConverter : ExceptionToProblemDetails.IExceptionToProblemDetailsConverter<TException, TProblemDetails> where TException : System.Exception where TProblemDetails : ProblemDetails
         {
             var converter = Activator.CreateInstance<TConverter>();
             options.Map<TException>((context, exception)=>actionDefinition.MatchRoute(context.Request.RouteValues), 

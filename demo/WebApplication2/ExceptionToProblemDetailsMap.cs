@@ -1,4 +1,3 @@
-using ExceptionToProblemDetails;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -10,8 +9,8 @@ using Opw.HttpExceptions.AspNetCore.Mappers;
 
 namespace WebApplication2
 {
-    
-    public class ExceptionMapperWrapper<TException>:IExceptionMapper  where TException : Exception 
+
+    public class ExceptionMapperWrapper<TException> : IExceptionMapper where TException : Exception
     {
         private readonly Func<HttpContext, Exception, ProblemDetailsResult>[] converters;
 
@@ -41,38 +40,37 @@ namespace WebApplication2
         {
             foreach (var converter in converters)
             {
-               var result = converter.Invoke(context, exception);
-               if(result != null) return result;
+                var result = converter.Invoke(context, exception);
+                if (result != null) return result;
             }
 
             return null;
         }
     }
-    
+
     public partial class ExceptionToProblemDetailsMap
     {
         private readonly HttpExceptionsOptions options;
-        private readonly List<Tuple<Type,Func<HttpContext, Exception, ProblemDetailsResult>>> converters= new List<Tuple<Type, Func<HttpContext, Exception, ProblemDetailsResult>>>();
+        private readonly List<Tuple<Type, Func<HttpContext, Exception, ProblemDetailsResult>>> converters = new List<Tuple<Type, Func<HttpContext, Exception, ProblemDetailsResult>>>();
         public ExceptionToProblemDetailsMap(HttpExceptionsOptions options)
         {
             this.options = options;
         }
-
-        partial void MapConverter<TConverter, TException, TProblemDetails>(int statusCode, ControllerActionDefinition actionDefinition) where TConverter : IExceptionToProblemDetailsConverter<TException, TProblemDetails> where TException : Exception where TProblemDetails : ProblemDetails
+        partial void MapConverter<TConverter, TException, TProblemDetails>(int statusCode, ExceptionToProblemDetails.ControllerActionDefinition actionDefinition) where TConverter : ExceptionToProblemDetails.IExceptionToProblemDetailsConverter<TException, TProblemDetails> where TException : System.Exception where TProblemDetails : ProblemDetails
         {
             var converter = Activator.CreateInstance<TConverter>();
             converters.Add(new Tuple<Type, Func<HttpContext, Exception, ProblemDetailsResult>>(typeof(TException),
                 (context, exception) =>
                 {
                     var ex = exception as TException;
-                    if (actionDefinition.MatchRoute(context.Request.RouteValues) && ex!=null)
-                        return new ProblemDetailsResult(converter.Convert(ex,statusCode))
+                    if (actionDefinition.MatchRoute(context.Request.RouteValues) && ex != null)
+                        return new ProblemDetailsResult(converter.Convert(ex, statusCode))
                         {
                             StatusCode = statusCode
                         };
                     return null;
                 }));
-            options.ExceptionMapper<TException,ExceptionMapperWrapper<TException>>(converters.Where(t=>t.Item1==typeof(TException)).Select(t=>t.Item2).ToList());
+            options.ExceptionMapper<TException, ExceptionMapperWrapper<TException>>(converters.Where(t => t.Item1 == typeof(TException)).Select(t => t.Item2).ToList());
         }
     }
 }
