@@ -146,7 +146,7 @@ namespace {mainMethod.ContainingNamespace.ToDisplayString()}
                 }
                 if (attribute.NamedArguments[0].Key == "ExceptionType")
                 {
-                    if (typeValue.ImplementsInterfaceOrBaseClass(typeof(Exception)))
+                    if (typeValue .ImplementsInterfaceOrBaseClass(typeof(Exception)))
                     {
                         Definitions.Add(new MapDefinition()
                         {

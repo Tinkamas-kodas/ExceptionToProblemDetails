@@ -2,7 +2,7 @@ using System;
 
 namespace DemoService
 {
-    public class NotFoundException : Exception
+    public class NotFoundException : SystemException
     {
     }
 }

@@ -5,6 +5,7 @@ namespace ExceptionToProblemDetails.Generator
 {
     public static class Helpers
     {
+        
         public static bool ImplementsInterfaceOrBaseClass(this INamedTypeSymbol typeSymbol, Type typeToCheck)
         {
             if (typeSymbol == null)
@@ -17,11 +18,15 @@ namespace ExceptionToProblemDetails.Generator
                 return true;
             }
 
-            if (typeSymbol.BaseType != null && typeSymbol.BaseType.MetadataName == typeToCheck.Name)
+            var baseType = typeSymbol.BaseType;
+            while (baseType != null)
             {
-                return true;
-            }
+                if (baseType.MetadataName == typeToCheck.Name)
+                    return true;
 
+                baseType = baseType.BaseType;
+            }
+             
             foreach (var @interface in typeSymbol.AllInterfaces)
             {
                 if (@interface.MetadataName == typeToCheck.Name)

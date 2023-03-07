@@ -12,9 +12,9 @@
 	  <Description>Generator for map exceptions to ProblemDetails and generate OpenAPI (swagger) speicification including ProblemDetails</Description>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <Version>1.1.0</Version>
-	  <AssemblyVersion>1.1.0</AssemblyVersion>
-	  <FileVersion>1.1.0</FileVersion>
+	  <Version>1.2.0</Version>
+	  <AssemblyVersion>1.2.0</AssemblyVersion>
+	  <FileVersion>1.2.0</FileVersion>
 	  <RepositoryUrl>https://github.com/Tinkamas-kodas/ExceptionToProblemDetails</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
   </PropertyGroup>
