@@ -32,9 +32,18 @@ namespace ExceptionToProblemDetails.Generator
             {
                 return;
             }
+            if (syntaxReceiver.Definitions.Count==0)
+                return;
+
             var mainMethod = context.Compilation.GetEntryPoint(context.CancellationToken);
             if (mainMethod == null) return;
-
+            if (mainMethod.ContainingNamespace.ToDisplayString()
+                .Equals("<global namespace>", StringComparison.InvariantCultureIgnoreCase))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Helpers.Ex2Pd000,
+                   mainMethod.Locations[0]));
+                return;
+            }
             var source = new StringBuilder($@"
 using ExceptionToProblemDetails;
 namespace {mainMethod.ContainingNamespace.ToDisplayString()}

@@ -64,5 +64,13 @@ namespace ExceptionToProblemDetails.Generator
             DiagnosticSeverity.Error,
             true
         );
+        public static readonly DiagnosticDescriptor Ex2Pd000 = new(
+            "EX2PD000",
+            "Can't use top level statements with generator",
+            "Main entry point can't use top level statements with ExceptionsToProblemDetails generator. Convert to class with static Main method.",
+            "ExceptionToProblemDetails",
+            DiagnosticSeverity.Warning,
+            true
+        );
     }
 }
