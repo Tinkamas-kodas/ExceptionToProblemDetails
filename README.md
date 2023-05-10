@@ -1,5 +1,8 @@
 # Versions
 
+
+* 1.4 - introduced attribute ExceptionMapClass
+
 * 1.2 - removed reference to Microsoft.AspNetCore.Mvc.Core
 
 # In English - [bellow](#Motivation)
@@ -40,11 +43,12 @@ Install-Package ExceptionToProblemDetails.Generator
 dotnet add package ExceptionToProblemDetails.Generator
 ```
 
-### 3. Susikurti partial klasę ExceptionToProblemDetailsMap, kuri užregistruos middleware Exception mapper
+### 3. Susikurti partial klasę ir dekoruoti ją atributu [ExceptionMapClass], kuri užregistruos middleware Exception mapper
 
 Žemiau pateiktas pavyzdys, registruojantis Hellang.Middleware.ProblemDetails middleware
 
 ```c#
+[ExceptionMapClass]
 public partial class ExceptionToProblemDetailsMap
 {
     private readonly ProblemDetailsOptions options;
@@ -125,11 +129,12 @@ Install-Package ExceptionToProblemDetails.Generator
 dotnet add package ExceptionToProblemDetails.Generator
 ```
 
-### 3.  Create a partial class ExceptionToProblemDetailsMap, which will register the Exception mapper middleware
+### 3.  Create a partial class and decorate it with attribute [ExceptionMapClass], which will register the Exception mapper middleware
 
 Below is an example registering the Hellang.Middleware.ProblemDetails middleware.
 
 ```c#
+[ExceptionMapClass]
 public partial class ExceptionToProblemDetailsMap
 {
     private readonly ProblemDetailsOptions options;

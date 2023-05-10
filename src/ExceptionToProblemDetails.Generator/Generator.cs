@@ -23,7 +23,7 @@ namespace ExceptionToProblemDetails.Generator
             // Register a factory that can create our custom syntax receiver
             context.RegisterForSyntaxNotifications(() => new MapToProblemDetailsAttributeSyntaxReceiver());
         }
-
+       
         public void Execute(GeneratorExecutionContext context)
         {
             // the generator infrastructure will create a receiver and populate it
@@ -35,54 +35,54 @@ namespace ExceptionToProblemDetails.Generator
             if (syntaxReceiver.Definitions.Count==0)
                 return;
 
-            var mainMethod = context.Compilation.GetEntryPoint(context.CancellationToken);
-            if (mainMethod == null) return;
-            if (mainMethod.ContainingNamespace.ToDisplayString()
-                .Equals("<global namespace>", StringComparison.InvariantCultureIgnoreCase))
+           
+
+            foreach (var node in syntaxReceiver.GenerateMapClass)
             {
-                context.ReportDiagnostic(Diagnostic.Create(Helpers.Ex2Pd000,
-                   mainMethod.Locations[0]));
-                return;
-            }
-            var source = new StringBuilder($@"
+
+
+                var source = new StringBuilder($@"
 using ExceptionToProblemDetails;
-namespace {mainMethod.ContainingNamespace.ToDisplayString()}
+namespace {node.Key.ContainingNamespace.ToDisplayString()}
 {{
-    public partial class ExceptionToProblemDetailsMap
+    public partial class {node.Key.Name}
     {{
             
             partial void MapConverter<TConverter, TException, TProblemDetails>(int statusCode, ExceptionToProblemDetails.ControllerActionDefinition actionDefinition) where TConverter : ExceptionToProblemDetails.IExceptionToProblemDetailsConverter<TException, TProblemDetails> where TException : System.Exception where TProblemDetails : Microsoft.AspNetCore.Mvc.ProblemDetails;
             public void Map()
             {{
 ");
-            foreach (var definition in syntaxReceiver.Definitions.OrderBy(t => t.InControllerName).ThenByDescending(t => t.InActionName))
-            {
-                if (definition.ConverterTypeFullQualifiedTypeName == null)
+                foreach (var definition in syntaxReceiver.Definitions.OrderBy(t => t.InControllerName)
+                             .ThenByDescending(t => t.InActionName))
                 {
-                    source.Append($@"
+                    if (definition.ConverterTypeFullQualifiedTypeName == null)
+                    {
+                        source.Append($@"
                 MapConverter<ExceptionToProblemDetails.BaseExceptionToProblemDetailsConverter<{definition.OnExceptionFullQualifiedTypeName},Microsoft.AspNetCore.Mvc.ProblemDetails>,{definition.OnExceptionFullQualifiedTypeName},Microsoft.AspNetCore.Mvc.ProblemDetails>({definition.StatusCode}, new ControllerActionDefinition({FormatString(definition.InControllerName)},{FormatString(definition.InActionName)}));
 ");
-                }
-                else
-                {
-                    source.Append($@"
+                    }
+                    else
+                    {
+                        source.Append($@"
                 MapConverter<{definition.ConverterTypeFullQualifiedTypeName},{definition.OnExceptionFullQualifiedTypeName},{definition.ProblemDetailsTypeFullQualifiedTypeName}>({definition.StatusCode}, new ControllerActionDefinition({FormatString(definition.InControllerName)},{FormatString(definition.InActionName)}));
 ");
+                    }
+
+
                 }
 
-
-            }
-
-            source.Append(@"
+                source.Append(@"
             }
     }
 }
 ");
-            foreach (var syntaxReceiverError in syntaxReceiver.Errors)
-            {
-                context.ReportDiagnostic(syntaxReceiverError);
+                foreach (var syntaxReceiverError in syntaxReceiver.Errors)
+                {
+                    context.ReportDiagnostic(syntaxReceiverError);
+                }
+
+                context.AddSource($"{node.Key.Name}.Generated.cs", SourceText.From(source.ToString(), Encoding.UTF8));
             }
-            context.AddSource("ExceptionToProblemDetails.g.cs", SourceText.From(source.ToString(), Encoding.UTF8));
         }
 
         private string FormatString(string value)
@@ -104,16 +104,21 @@ namespace {mainMethod.ContainingNamespace.ToDisplayString()}
         {
             public List<MapDefinition> Definitions { get; } = new();
             public List<Diagnostic> Errors { get; } = new();
+            public Dictionary<INamedTypeSymbol, SyntaxNode> GenerateMapClass { get; } = new();
             public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
             {
                 if (context.Node is ClassDeclarationSyntax { AttributeLists: { Count: > 0 } })
                 {
-                    var controllerSymbol = context.SemanticModel.GetDeclaredSymbol(context.Node) as INamedTypeSymbol;
-                    if (controllerSymbol == null)
+                    var classSymbol = context.SemanticModel.GetDeclaredSymbol(context.Node) as INamedTypeSymbol;
+                    if (classSymbol == null)
                         return;
-                    foreach (var attribute in controllerSymbol.GetAttributes().Where(t => t.AttributeClass?.Name == "MapToProblemDetailsAttribute"))
+                    foreach (var attribute in classSymbol.GetAttributes())
                     {
-                        AddMapDefinition(attribute, null, controllerSymbol.Name, context.Node);
+                        if (attribute.AttributeClass?.Name == "MapToProblemDetailsAttribute")
+                            AddMapDefinition(attribute, null, classSymbol.Name, context.Node);
+                        if (attribute.AttributeClass?.Name == "ExceptionMapClassAttribute")
+                            AddGeneratedClassDefinition(classSymbol, context.Node);
+
                     }
                 }
 
@@ -131,7 +136,12 @@ namespace {mainMethod.ContainingNamespace.ToDisplayString()}
                     }
                 }
             }
-            
+
+            private void AddGeneratedClassDefinition(INamedTypeSymbol classSymbol, SyntaxNode contextNode)
+            {
+                this.GenerateMapClass.Add(classSymbol, contextNode);
+            }
+
             private void AddMapDefinition(AttributeData attribute, string actionName, string controllerName,
                 SyntaxNode contextNode)
             {

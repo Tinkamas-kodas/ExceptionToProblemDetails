@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ExceptionToProblemDetails;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Opw.HttpExceptions.AspNetCore;
@@ -48,6 +49,7 @@ namespace WebApplication2
         }
     }
 
+    [ExceptionMapClass]
     public partial class ExceptionToProblemDetailsMap
     {
         private readonly HttpExceptionsOptions options;

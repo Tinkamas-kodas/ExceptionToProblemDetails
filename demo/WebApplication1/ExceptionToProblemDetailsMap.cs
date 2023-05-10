@@ -1,9 +1,11 @@
 using Hellang.Middleware.ProblemDetails;
 using System;
 using Microsoft.AspNetCore.Mvc;
+using ExceptionToProblemDetails;
 
 namespace WebApplication1
 {
+    [ExceptionMapClass]
     public partial class ExceptionToProblemDetailsMap
     {
         private readonly ProblemDetailsOptions options;
