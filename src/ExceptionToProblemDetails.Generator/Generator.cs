@@ -23,7 +23,7 @@ namespace ExceptionToProblemDetails.Generator
             // Register a factory that can create our custom syntax receiver
             context.RegisterForSyntaxNotifications(() => new MapToProblemDetailsAttributeSyntaxReceiver());
         }
-       
+
         public void Execute(GeneratorExecutionContext context)
         {
             // the generator infrastructure will create a receiver and populate it
@@ -32,10 +32,10 @@ namespace ExceptionToProblemDetails.Generator
             {
                 return;
             }
-            if (syntaxReceiver.Definitions.Count==0)
+            if (syntaxReceiver.Definitions.Count == 0)
                 return;
 
-           
+
 
             foreach (var node in syntaxReceiver.GenerateMapClass)
             {
@@ -105,52 +105,46 @@ namespace {node.Key.ContainingNamespace.ToDisplayString()}
             public List<MapDefinition> Definitions { get; } = new();
             public List<Diagnostic> Errors { get; } = new();
             public Dictionary<INamedTypeSymbol, SyntaxNode> GenerateMapClass { get; } = new();
-            private static ClassDeclarationSyntax? GetParentClassDeclaration(ClassDeclarationSyntax syntaxNode)
+
+
+            private IEnumerable< AttributeData> GetAttributes(INamedTypeSymbol classSymbol)
             {
-                SyntaxNode? parentNode = syntaxNode.Parent;
-                while (parentNode != null)
-                {
-                    if (parentNode is ClassDeclarationSyntax classDeclarationSyntax)
-                    {
-                        return classDeclarationSyntax;
-                    }
-
-                    parentNode = parentNode.Parent;
-                }
-
-                return null;
-            }
-
-            private IEnumerable<(INamedTypeSymbol, AttributeData)> GetAttributes(GeneratorSyntaxContext context,ClassDeclarationSyntax classDeclaration)
-            {
-                if (classDeclaration == null) yield break;
-                if (context.SemanticModel.GetDeclaredSymbol(classDeclaration) is not INamedTypeSymbol classSymbol) yield break;
+                if (classSymbol == null) yield break;
                 foreach (var attributeData in classSymbol.GetAttributes())
                 {
-                    yield return (classSymbol,attributeData);
+                    yield return  attributeData;
                 }
 
-                foreach (var attributeData in GetAttributes(context,
-                             GetParentClassDeclaration(classDeclaration)))
+                foreach (var attributeData in GetAttributes(classSymbol.BaseType))
                 {
                     yield return attributeData;
                 }
             }
             public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
             {
-                if (context.Node is ClassDeclarationSyntax  classDeclaration)
+                if (context.Node is ClassDeclarationSyntax)
                 {
                     var classSymbol = context.SemanticModel.GetDeclaredSymbol(context.Node) as INamedTypeSymbol;
                     if (classSymbol == null || classSymbol.IsAbstract)
                         return;
-                    foreach (var (@class, attribute) in GetAttributes(context, classDeclaration))
+                    if (classSymbol.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (attribute.AttributeClass?.Name == "MapToProblemDetailsAttribute")
-                            AddMapDefinition(attribute, null, @class.Name, context.Node);
-                        if (attribute.AttributeClass?.Name == "ExceptionMapClassAttribute")
-                            AddGeneratedClassDefinition(classSymbol, context.Node);
-
+                        foreach (var  attribute in GetAttributes(classSymbol)
+                                     .Where(t => t.AttributeClass?.Name == "MapToProblemDetailsAttribute"))
+                        {
+                            AddMapDefinition(attribute, null, classSymbol.Name, context.Node);
+                        }
                     }
+                    else
+                    {
+                        if (classSymbol
+                            .GetAttributes()
+                            .Any(t => t.AttributeClass?.Name == "ExceptionMapClassAttribute"))
+                        {
+                            AddGeneratedClassDefinition(classSymbol, context.Node);
+                        }
+                    }
+
                 }
 
                 if (context.Node is MethodDeclarationSyntax { AttributeLists: { Count: > 0 } })
@@ -190,14 +184,14 @@ namespace {node.Key.ContainingNamespace.ToDisplayString()}
                     return;
                 }
 
-                var type= attribute.NamedArguments[0].Value;
+                var type = attribute.NamedArguments[0].Value;
                 if (type.Value is not INamedTypeSymbol typeValue)
                 {
                     return;
                 }
                 if (attribute.NamedArguments[0].Key == "ExceptionType")
                 {
-                    if (typeValue .ImplementsInterfaceOrBaseClass(typeof(Exception)))
+                    if (typeValue.ImplementsInterfaceOrBaseClass(typeof(Exception)))
                     {
                         Definitions.Add(new MapDefinition()
                         {
@@ -250,7 +244,7 @@ namespace {node.Key.ContainingNamespace.ToDisplayString()}
                         ));
                     }
                 }
-               
+
             }
         }
     }

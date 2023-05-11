@@ -1,6 +1,6 @@
 # Versions
 
-* 1.4.1 - the MapToProblemDetails attribute could be placed on base class
+* 1.4.2 - the MapToProblemDetails attribute could be placed on base class
 
 * 1.4 - introduced attribute ExceptionMapClass
 

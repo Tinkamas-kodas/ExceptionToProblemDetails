@@ -16,7 +16,6 @@ namespace WebApplication1.Controllers
     
     public class WeatherForecastController : BaseController
     {
-        
 
         private readonly WeatherForecastService forecastService;
 
@@ -34,7 +33,7 @@ namespace WebApplication1.Controllers
         {
             if (string.IsNullOrEmpty(location))
                 throw new SecurityExceptionEnriched(ForbiddenReasonEnum.EntityDeleted);
-             return forecastService.GetForecastForLocation(location);
+            return forecastService.GetForecastForLocation(location);
         }
         [HttpDelete("{location}")]
         [ProducesResponseType(StatusCodes.Status200OK )]
