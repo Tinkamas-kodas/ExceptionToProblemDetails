@@ -105,17 +105,48 @@ namespace {node.Key.ContainingNamespace.ToDisplayString()}
             public List<MapDefinition> Definitions { get; } = new();
             public List<Diagnostic> Errors { get; } = new();
             public Dictionary<INamedTypeSymbol, SyntaxNode> GenerateMapClass { get; } = new();
+            private static ClassDeclarationSyntax? GetParentClassDeclaration(ClassDeclarationSyntax syntaxNode)
+            {
+                SyntaxNode? parentNode = syntaxNode.Parent;
+                while (parentNode != null)
+                {
+                    if (parentNode is ClassDeclarationSyntax classDeclarationSyntax)
+                    {
+                        return classDeclarationSyntax;
+                    }
+
+                    parentNode = parentNode.Parent;
+                }
+
+                return null;
+            }
+
+            private IEnumerable<(INamedTypeSymbol, AttributeData)> GetAttributes(GeneratorSyntaxContext context,ClassDeclarationSyntax classDeclaration)
+            {
+                if (classDeclaration == null) yield break;
+                if (context.SemanticModel.GetDeclaredSymbol(classDeclaration) is not INamedTypeSymbol classSymbol) yield break;
+                foreach (var attributeData in classSymbol.GetAttributes())
+                {
+                    yield return (classSymbol,attributeData);
+                }
+
+                foreach (var attributeData in GetAttributes(context,
+                             GetParentClassDeclaration(classDeclaration)))
+                {
+                    yield return attributeData;
+                }
+            }
             public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
             {
-                if (context.Node is ClassDeclarationSyntax { AttributeLists: { Count: > 0 } })
+                if (context.Node is ClassDeclarationSyntax  classDeclaration)
                 {
                     var classSymbol = context.SemanticModel.GetDeclaredSymbol(context.Node) as INamedTypeSymbol;
-                    if (classSymbol == null)
+                    if (classSymbol == null || classSymbol.IsAbstract)
                         return;
-                    foreach (var attribute in classSymbol.GetAttributes())
+                    foreach (var (@class, attribute) in GetAttributes(context, classDeclaration))
                     {
                         if (attribute.AttributeClass?.Name == "MapToProblemDetailsAttribute")
-                            AddMapDefinition(attribute, null, classSymbol.Name, context.Node);
+                            AddMapDefinition(attribute, null, @class.Name, context.Node);
                         if (attribute.AttributeClass?.Name == "ExceptionMapClassAttribute")
                             AddGeneratedClassDefinition(classSymbol, context.Node);
 
@@ -139,7 +170,8 @@ namespace {node.Key.ContainingNamespace.ToDisplayString()}
 
             private void AddGeneratedClassDefinition(INamedTypeSymbol classSymbol, SyntaxNode contextNode)
             {
-                this.GenerateMapClass.Add(classSymbol, contextNode);
+                if (!GenerateMapClass.ContainsKey(classSymbol))
+                    GenerateMapClass.Add(classSymbol, contextNode);
             }
 
             private void AddMapDefinition(AttributeData attribute, string actionName, string controllerName,

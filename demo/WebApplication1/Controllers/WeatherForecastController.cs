@@ -5,10 +5,16 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebApplication1.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
     [MapToProblemDetails( StatusCodes.Status500InternalServerError,ExceptionType = typeof(Exception))]
     [ProducesResponseType(StatusCodes.Status400BadRequest )]
-    public class WeatherForecastController : ControllerBase
+    public abstract class BaseController : ControllerBase
+    {
+
+    }
+
+    [Route("[controller]")]
+    
+    public class WeatherForecastController : BaseController
     {
         
 
