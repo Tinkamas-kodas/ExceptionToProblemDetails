@@ -14,7 +14,7 @@ namespace ExceptionToProblemDetails.Generator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
-#if DEBUG
+#if DEBUG_GENERATOR
             if (!Debugger.IsAttached)
             {
                 Debugger.Launch();
